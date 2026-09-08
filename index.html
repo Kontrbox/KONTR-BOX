@@ -136,7 +136,42 @@
             <img src="indicator.png" alt="Индикатор 6S">
             <a href="https://google.com" target="_blank" class="part-link">🔗 Настройка тестера батареи</a>
         </div>
+<script>
+    function runVerification() {
+        const serialInput = document.getElementById('serial-input');
+        const serialNumber = serialInput.value.trim().toUpperCase();
+        
+        const successBox = document.getElementById('result-success');
+        const errorBox = document.getElementById('result-error');
+        const resSnSpan = document.getElementById('res-sn');
 
+        successBox.style.display = 'none';
+        errorBox.style.display = 'none';
+
+        if (serialNumber === "") {
+            alert("Пожалуйста, введите серийный номер колонки!");
+            return;
+        }
+
+        const validSerials = ["KB-01-ORIGINAL", "KONTRBOX-250W", "TEST-123"];
+
+        if (validSerials.includes(serialNumber)) {
+            resSnSpan.textContent = serialNumber;
+            successBox.style.display = 'block';
+            successBox.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            errorBox.style.display = 'block';
+            errorBox.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    function startFastScan() {
+        alert("Запуск системного сканера... Тестовый код подставится автоматически.");
+        document.getElementById('serial-input').value = "KB-01-ORIGINAL";
+    }
+</script>
+</body>
+</html>
         <div class="part-card">
             <h4 style="margin:0; color:#fff;">6. Металлическая кнопка питания 22 мм</h4>
             <img src="button.png" alt="Кнопка питания">
