@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontrbox 0.1 — Официальная проверка</title>
+    <!-- Подключаем библиотеку для реальной работы камеры смартфона -->
+    <script src="https://unpkg.com" type="text/javascript"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0e121a; color: #e2e8f0; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 550px; width: 100%; background: #1a202c; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; border: 1px solid #2d3748; margin-top: 10px; }
+        h1 { text-align: center; font-size: 26px; margin-bottom: 20px; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        input { padding: 16px; background: #2d3748; border: 2px solid #4a5568; border-radius: 8px; font-size: 16px; color: #fff; outline: none; text-align: center; font-weight: bold; width: 100%; box-sizing: border-box; }
+        input:focus { border-color: #38a169; }
+        button { background: #38a169; color: white; border: none; padding: 16px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; text-transform: uppercase; width: 100%; box-sizing: border-box; }
+        button:hover { background: #2f855a; }
+        #scan-btn { background: #3182ce; }
+        #scan-btn:hover { background: #2b6cb0; }
+        
+        /* Стили рамок результатов ПРАВИЛЬНО / НЕПРАВИЛЬНО */
+        .result-box { display: none; margin-top: 20px; padding: 25px; border-radius: 12px; border: 2px solid transparent; }
+        .success { display: block; border-color: #38a169; background: #1c4532; color: #fff; }
+        .error { display: block; border-color: #e53e3e; background: #652b2b; color: #fed7d7; text-align: center; font-weight: bold; }
+        
+        .specs-list { padding-left: 20px; font-size: 15px; line-height: 1.7; color: #e2e8f0; text-align: left; }
+        .specs-list b { color: #fff; }
+        .parts-title { margin-top: 25px; font-size: 18px; color: #fff; border-bottom: 1px solid #4a5568; padding-bottom: 8px; text-align: left; }
+        .part-card { background: #2d3748; padding: 15px; border-radius: 10px; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #4a5568; text-align: left; }
+        .part-card img { width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; background: #252b36; }
+        .part-link { display: inline-block; text-align: center; background: #4a5568; color: #fff; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; transition: 0.2s; }
+        .part-link:hover { background: #718096; }
+        h2, h3, h4 { color: #fff; margin-top: 25px; margin-bottom: 10px; text-align: left; }
+        #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 8px; overflow: hidden; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🛡️ KONTRBOX VERIFY</h1>
+    
+    <div class="input-group">
+        <button id="scan-btn" onclick="toggleScanner()">📷 Включить сканер штрих-кода</button>
+        <div id="reader"></div>
+        
+        <input type="text" id="serial-input" placeholder="ВВЕДИТЕ СЕРИЙНЫЙ НОМЕР КОЛОНКИ">
+        <button onclick="runVerification()">Проверить подлинность</button>
+    </div>
+
+    <!-- Контейнер для вывода правильного или ошибочного результата -->
+    <div id="result-container"></div>
+</div>
+
+<script type="text/javascript">
+var html5QrCodeScanner = null;
+
+function toggleScanner() {
+    var btn = document.getElementById('scan-btn');
+    var resultContainer = document.getElementById('result-container');
+    resultContainer.innerHTML = "";
+if (html5QrCodeScanner) {
+        stopScanner();
+        return;
+    }
+
+    btn.innerText = "🛑 Остановить сканер";
+    btn.style.background = "#e53e3e";
+
+    html5QrCodeScanner = new Html5QrcodeScanner("reader", { 
+        fps: 15, 
+        qrbox: { width: 280, height: 150 },
+        rememberLastUsedCamera: true
+    }, false);
+    
+    html5QrCodeScanner.render(onScanSuccess, onScanFailure);
+}
+
+function onScanSuccess(decodedText) {
+    document.getElementById('serial-input').value = decodedText;
+    stopScanner();
+    runVerification(); 
+}
+
+function onScanFailure(error) {}
+
+function stopScanner() {
+    var btn = document.getElementById('scan-btn');
+    if (html5QrCodeScanner) {
+        html5QrCodeScanner.clear().then(function() {
+            html5QrCodeScanner = null;
+            btn.innerText = "📷 Включить сканер штрих-кода";
+            btn.style.background = "#3182ce";
+        }).catch(function() {
+            html5QrCodeScanner = null;
+            btn.innerText = "📷 Включить сканер штрих-кода";
+            btn.style.background = "#3182ce";
+        });
+    }
+}
+
+// СКРИПТ ПРОВЕРИ С ТВОИМИ ТЕКСТАМИ УСПЕХА И ПРЕДУПРЕЖДЕНИЯ
+function runVerification() {
+    var inputVal = document.getElementById('serial-input').value;
+    var serialNumber = inputVal.replace(/^\s+|\s+$/g, '');
+    var resultContainer = document.getElementById('result-container');
+    
+    if (serialNumber === "") {
+        alert("Пожалуйста, введите или отсканируйте серийный номер!");
+        return;
+    }
+
+    // Если серийник ПРАВИЛЬНЫЙ -> Зеленый блок успеха
+    if (serialNumber === "8602095001") {
+        resultContainer.innerHTML = `
+            <div class="result-box success">
+                <p style="text-align: center; font-size: 16px; margin: 0 0 15px 0;"><b>🟢 Статус: Оригинальный продукт Kontrbox</b></p>
+                
+                <p style="font-size: 15px; line-height: 1.6; text-align: justify; margin-bottom: 20px;"> 
+                    Аудиосистема с указанным серийным номером является официальным оригиналом. Она полностью собрана по инженерным стандартам компании, прошла жесткий технический контроль звука и находится на фирменной гарантии.
+                </p>
+                
+                <div style="background: #2d3748; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #4a5568;">
+                    <p style="margin: 5px 0;"><b>Модель:</b> Контрбокс 0.1 (Kontrbox 0.1)</p>
+                    <p style="margin: 5px 0;"><b>Серийный номер:</b> <span style="color: #48bb78; font-weight: bold;">${serialNumber}</span></p>
+                    <p style="margin: 5px 0;"><b>Статус устройства:</b> Активно / Зарегистрировано в единой базе</p>
+                    <p style="margin: 5px 0;"><b>Поддержка:</b> Доступно полное техническое сопровождение и гарантия</p>
+                </div>
+
+                <h3>📊 Полный лист технических характеристик</h3>
+                
+                <h4>📐 Корпус и габариты</h4>
+                <ul class="specs-list">
+                    <li><b>Форм-фактор:</b> Тяжелая премиальная аудиосистема 2.1</li>
+                    <li><b>Длина (Глубина):</b> 380 мм</li>
+                    <li><b>Ширина:</b> 200 мм</li>
+                    <li><b>Высота:</b> 200 мм</li>
+                    <li><b>Общий объем корпуса:</b> 15.2 литра</li>
+                    <li><b>Тип сборки:</b> Кастомная инженерная конструкция с жестким демпфированием</li>
+                    <li><b>Материал корпуса:</b> Сделано из дерева ✅</li>
+                </ul>
+
+                <h4>🔊 Реальная звуковая мощность</h4>
+                <ul class="specs-list">
+                    <li><b>Номинальная чистая мощность:</b> 250 Вт RMS</li>
+                    <li><b>Особенность звука:</b> Это честная, настоящая мощность аудиосистемы. Никаких завышенных цифр на коробке. Колонка выдает плотный, пробивающий тело бас и кристально чистый звук без искажений даже на максимальной громкости.</li>
+<li><b>Тип аудиосистемы:</b> Трехканальный True Sound (2.1)</li>
+                    <li><b>Низкочастотный динамик (Сабвуфер):</b> Профессиональный тяжелый вуфер AIYIMA 5.25 дюймов (4 Ом)</li>
+                    <li><b>Широкополосные динамики (Каналы R/L):</b> Два мощных динамика по 4 дюйма для идеальной детализации средних и высоких частот</li>
+                </ul>
+
+                <h4>🧠 Усилитель и управление</h4>
+                <ul class="specs-list">
+                    <li><b>Сердце системы:</b> Высокоэффективный цифровой усилитель ZK-HT21 на оригинальном мощном чипе TDA7498E</li>
+                    <li><b>Беспроводная связь:</b> Bluetooth 5.0 (мгновенное подключение, стабильный сигнал, передача звука без потерь)</li>
+                    <li><b>Проводное подключение:</b> Классический аудиовход AUX (3.5 мм) и USB-порт для воспроизведения музыки с флеш-карт</li>
+                    <li><b>Аналоговая панель управления (Тонкая настройка):</b>
+                        <br>• Регулятор частоты среза сабвуфера (Subwoofer Freq)
+                        <br>• Регулятор индивидуальной громкости сабвуфера (Subwoofer Volume)
+                        <br>• Регулятор высоких частот (Treble)
+                        <br>• Регулятор низких частот (Bass)
+                        <br>• Общий силовой регулятор громкости и питания (Main Volume)
+                    </li>
+                </ul>
+
+                <h4>⚡ Электроника, питание и защита</h4>
+                <ul class="specs-list">
+                    <li><b>Энергетическая база:</b> Мощная аккумуляторная сборка повышенной емкости 6S (номинальное рабочее напряжение 22.2 В — 24 В)</li>
+                    <li><b>Система умной защиты (BMS):</b> Плата 6S 40A 12mos (полный контроль от перезаряда, глубокого разряда и коротких замыканий)</li>
