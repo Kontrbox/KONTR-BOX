@@ -2,77 +2,70 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
     <title>Kontrbox Verify</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0e121a; color: #e2e8f0; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 550px; width: 100%; background: #1a202c; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; border: 1px solid #2d3748; margin-top: 10px; }
-        h1 { text-align: center; font-size: 26px; margin-bottom: 20px; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
-        .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        input { padding: 16px; background: #2d3748; border: 2px solid #4a5568; border-radius: 8px; font-size: 18px; color: #fff; outline: none; text-align: center; font-weight: bold; width: 100%; box-sizing: border-box; letter-spacing: 1px; }
-        input:focus { border-color: #38a169; }
-        .btn { text-align: center; display: block; background: #38a169; color: white; border: none; padding: 18px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; text-transform: uppercase; width: 100%; box-sizing: border-box; text-decoration: none; }
-        .btn:hover { background: #2f855a; }
-        .btn-secondary { background: #4a5568; }
-        .btn-secondary:hover { background: #718096; }
-        .btn-stop { background: #e53e3e; margin-top: 10px; }
-        .btn-stop:hover { background: #c53030; }
-        
-        .result-box { display: none; margin-top: 20px; padding: 25px; border-radius: 12px; border: 2px solid transparent; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0e121a; color: #e2e8f0; margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .container {
+            max-width: 500px; width: 100%; background: #1a202c;
+            padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #2d3748;
+        }
+        h1 {
+            text-align: center; font-size: 24px; margin-bottom: 25px;
+            color: #fff; text-transform: uppercase; letter-spacing: 2px;
+        }
+        input[type="text"] {
+            padding: 18px; background: #2d3748; border: 2px solid #4a5568;
+            border-radius: 12px; font-size: 16px; color: #fff; outline: none;
+            text-align: center; font-weight: bold; width: 100%; letter-spacing: 1px;
+        }
+        input[type="text"]:focus { border-color: #38a169; }
+        .btn {
+            text-align: center; display: block; border: none; padding: 18px;
+            font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer;
+            transition: 0.2s; text-transform: uppercase; width: 100%;
+        }
+        .btn-verify { background: #38a169; color: white; }
+        .btn-verify:hover { background: #2f855a; }
+        .btn-qr { background: #4a5568; color: white; margin-top: 15px; }
+        .btn-qr:hover { background: #718096; }
+
+        #camera-input { display: none; }
+        label[for="camera-input"] { display: block; }
+
+        .preview-area {
+            margin-top: 20px; display: none; text-align: center;
+        }
+        .preview-img {
+            max-width: 100%; border-radius: 12px; border: 2px solid #38a169;
+        }
+
+        .result-box {
+            display: none; margin-top: 20px; padding: 20px;
+            border-radius: 12px; border: 2px solid transparent;
+            text-align: center; font-weight: bold;
+        }
         .success { display: block; border-color: #38a169; background: #1c4532; color: #fff; }
-        .error { display: block; border-color: #e53e3e; background: #652b2b; color: #fed7d7; text-align: center; font-weight: bold; }
+        .error { display: block; border-color: #e53e3e; background: #652b2b; color: #fed7d7; }
 
-        .scanner-section { display: none; margin-top: 20px; padding: 20px; background: #2d3748; border-radius: 12px; border: 1px solid #4a5568; }
-        .scanner-section.active { display: block; }
-
-        #qr-reader { width: 100%; margin-top: 15px; border-radius: 12px; overflow: hidden; position: relative; }
-        #qr-reader video { width: 100% !important; display: block; }
-        /* Рамка для сканирования */
-        #qr-reader::after {
-            content: ""; position: absolute; inset: 10%; border: 4px solid #28a745; 
-            border-radius: 16px; box-shadow: 0 0 18px rgba(40, 167, 69, 0.6); 
-            pointer-events: none; z-index: 10;
+        /* Рамка для наведения на QR при фото */
+        .scan-guide {
+            position: relative;
+            width: 80%; max-width: 320px; aspect-ratio: 1;
+            border: 4px solid #38a169; border-radius: 8px;
+            margin: 30px auto 15px;
+            box-shadow: 0 0 20px rgba(56, 161, 105, 0.4);
         }
-        #qr-reader::before {
-            content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5);
-            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-            mask-composite: exclude; -webkit-mask-composite: xor; padding: 10%;
-            pointer-events: none; z-index: 9;
+        .scan-hint {
+            text-align: center; color: #a0aec0; font-size: 13px;
+            line-height: 1.4; margin-top: 8px;
         }
-
-        #flash-btn {
-            background: #718096; color: #fff; border: none; padding: 14px; font-size: 16px;
-            font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase;
-            width: 100%; box-sizing: border-box; margin-top: 10px; transition: 0.2s;
-        }
-        #flash-btn:hover { background: #4a5568; }
-        #flash-btn.active { background: #38a169; box-shadow: 0 0 15px rgba(56, 161, 105, 0.6); }
-        #flash-btn:disabled { background: #cbd5e0; cursor: not-allowed; opacity: 0.6; }
-
-        .flash-hint { margin-top: 8px; font-size: 13px; color: #a0aec0; text-align: center; }
-        
-        /* ОСОБЫЙ СТИЛЬ ДЛЯ ПОДСКАЗКИ ПРО ФОНАРИК */
-        .manual-flash-alert {
-            margin-top: 15px;
-            padding: 15px;
-            background: #e53e3e;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            color: white;
-            border: 2px dashed #fff;
-            display: none; /* Скрыто по умолчанию */
-        }
-        .manual-flash-alert.visible { display: block; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-
-        .specs-list { padding-left: 20px; font-size: 15px; line-height: 1.7; color: #e2e8f0; text-align: left; }
-        .specs-list b { color: #fff; }
-        .parts-title { margin-top: 25px; font-size: 18px; color: #fff; border-bottom: 1px solid #4a5568; padding-bottom: 8px; text-align: left; }
-        .part-card { background: #2d3748; padding: 15px; border-radius: 10px; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #4a5568; text-align: left; }
-        .part-link { display: inline-block; text-align: center; background: #4a5568; color: #fff; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; transition: 0.2s; }
-        .part-link:hover { background: #718096; }
     </style>
 </head>
 <body>
@@ -80,215 +73,98 @@
 <div class="container">
     <h1>🛡️ KONTRBOX VERIFY</h1>
 
-    <div class="input-group">
-        <input type="text" id="serial-input" placeholder="ВВЕДИТЕ СЕРИЙНЫЙ НОМЕР КОЛОНКИ">
-        <button id="verify-btn" class="btn">Проверить подлинность</button>
-        <button id="qr-btn" class="btn btn-secondary">📷 Открыть камеру (QR)</button>
-    </div>
+    <!-- Подсказка, куда класть QR -->
+    <div class="scan-guide"></div>
+    <p class="scan-hint">
+        Наведите рамку на QR-код при фотографировании.<br>
+        На iPhone вспышка включается в родной камере.
+    </p>
 
-    <div id="scanner-section" class="scanner-section">
-        <h3 style="margin-top: 0;">Сканирование QR-кода</h3>
-        <div id="qr-reader"></div>
-        
-        <!-- Кнопка вспышки (работает только на Android) -->
-        <button id="flash-btn" disabled>🔦 Включить вспышку</button>
-        <p class="flash-hint" id="flash-hint"></p>
+    <input type="text" id="serial-input" placeholder="СЕРИЙНЫЙ НОМЕР">
+    <button id="verify-btn" class="btn btn-verify">Проверить подлинность</button>
 
-        <!-- КРИТИЧЕСКИ ВАЖНО: Подсказка для iPhone и Android, где вспышка не работает -->
-        <div id="manual-flash-alert" class="manual-flash-alert">
-            🔴 В БРАУЗЕРЕ НЕЛЬЗЯ ВКЛЮЧИТЬ ФОНАРИК АВТОМАТИЧЕСКИ!<br>
-            👉 Включите фонарик вручную в Пункте управления телефона!
-        </div>
+    <label for="camera-input" class="btn btn-qr">📷 Сфоткать QR-код</label>
+    <input type="file" id="camera-input" accept="image/*" capture="environment">
 
-        <button id="qr-stop-btn" class="btn btn-stop">Остановить камеру</button>
+    <div id="photo-preview" class="preview-area">
+        <img id="photo-img" class="preview-img" src="" alt="QR фото">
     </div>
 
     <div id="result-container"></div>
 </div>
 
-<!-- Подключаем библиотеку -->
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<!-- Библиотека для чтения QR с фото -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
-<script type="text/javascript">
+<script>
 document.addEventListener("DOMContentLoaded", function() {
-    var verifyBtn = document.getElementById("verify-btn");
-    var serialInput = document.getElementById("serial-input");
-    var resultContainer = document.getElementById("result-container");
-    var qrBtn = document.getElementById("qr-btn");
-    var qrStopBtn = document.getElementById("qr-stop-btn");
-    var scannerSection = document.getElementById("scanner-section");
-    var qrReader = document.getElementById("qr-reader");
-    var flashBtn = document.getElementById("flash-btn");
-    var flashHint = document.getElementById("flash-hint");
-    var manualFlashAlert = document.getElementById("manual-flash-alert");
-    
-    var qrScanner = null;
-    var cameraActive = false;
-    var isFlashOn = false;
+    const verifyBtn = document.getElementById("verify-btn");
+    const serialInput = document.getElementById("serial-input");
+    const resultContainer = document.getElementById("result-container");
+    const cameraInput = document.getElementById("camera-input");
+    const photoPreview = document.getElementById("photo-preview");
+    const photoImg = document.getElementById("photo-img");
 
-    // === Логика проверки серийника ===
-    function runVerification() {
-        if (!serialInput || !resultContainer) return;
-        var inputVal = serialInput.value;
-        var serialNumber = inputVal.replace(/^\s+|\s+\$/g, "");
-
-        if (serialNumber === "") { alert("Пожалуйста, введите серийный номер!"); return; }
-
-        if (serialNumber === "8602095001") {
-            resultContainer.innerHTML = '<div class="result-box success"><p style="text-align:center; font-weight:bold;">🟢 Статус: Оригинальный продукт Kontrbox</p><p>Устройство с номером ' + serialNumber + ' найдено в базе.</p></div>';
+    function checkSerial(serial) {
+        if (!serial) return;
+        const s = serial.trim();
+        if (s === "8602095001") {
+            resultContainer.innerHTML = `
+                <div class="result-box success">
+                    <p>🟢 Оригинальный продукт Kontrbox</p>
+                    <p style="font-size:14px; color:#cbd5e0; margin-top:8px;">
+                        Устройство зарегистрировано в базе.
+                    </p>
+                </div>`;
         } else {
-            resultContainer.innerHTML = '<div class="result-box error"><p style="text-align:center;">🔴 Серийный номер не найден</p><p>Возможно, это подделка.</p></div>';
+            resultContainer.innerHTML = `
+                <div class="result-box error">
+                    <p>🔴 Серийный номер не найден</p>
+                    <p style="font-size:14px; color:#fed7d7; margin-top:8px;">
+                        Проверьте правильность ввода или отсканируйте QR заново.
+                    </p>
+                </div>`;
         }
     }
 
-    if (verifyBtn) {
-        verifyBtn.addEventListener("click", runVerification);
-    }
-    if (serialInput) {
-        serialInput.addEventListener("keypress", function(e) { if (e.key === "Enter") runVerification(); });
-    }
+    if (verifyBtn) verifyBtn.addEventListener("click", () => checkSerial(serialInput.value));
+    if (serialInput) serialInput.addEventListener("keypress", e => { if (e.key === "Enter") checkSerial(serialInput.value); });
 
-    // === Логика вспышки ===
-    if (flashBtn) {
-        flashBtn.addEventListener("click", function() {
-            if (!qrScanner || !cameraActive) { alert("Сначала запустите камеру!"); return; }
-            
-            // Проверяем поддержку вспышки
-            if (qrScanner.isFlashSupported && qrScanner.isFlashSupported()) {
-                qrScanner.toggleFlash(isFlashOn)
-                    .then(function() {
-                        isFlashOn = !isFlashOn;
-                        if (isFlashOn) {
-                            flashBtn.textContent = "🔦 Выключить вспышку";
-                            flashBtn.classList.add("active");
-                            flashHint.textContent = "";
-                            manualFlashAlert.classList.remove("visible"); // Скрываем подсказку про ручной фонарик
-                        } else {
-                            flashBtn.textContent = "🔦 Включить вспышку";
-                            flashBtn.classList.remove("active");
-                            flashHint.textContent = "";
-                        }
-                    })
-                    .catch(function(err) {
-                        console.error("Ошибка вспышки:", err);
-                        flashHint.textContent = "Не удалось переключить вспышку.";
-                    });
+    cameraInput.addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        photoPreview.style.display = "block";
+        const url = URL.createObjectURL(file);
+        photoImg.src = url;
+
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+            if (code && code.data) {
+                serialInput.value = code.data.trim();
+                checkSerial(code.data.trim());
             } else {
-                // Если вспышки нет (iPhone) - показываем большую красную подсказку
-                flashHint.textContent = "Вспышка недоступна через браузер.";
-                manualFlashAlert.classList.add("visible");
+                resultContainer.innerHTML = `
+                    <div class="result-box error">
+                        <p>❌ QR не распознан</p>
+                        <p style="font-size:13px; color:#fed7d7;">
+                            Сфотографируйте чётче, держите QR ровно в рамке, без бликов.
+                        </p>
+                    </div>`;
             }
-        });
-    }
-
-    // === Логика камеры ===
-    if (qrBtn) {
-        qrBtn.addEventListener("click", function() {
-            if (cameraActive) return;
-
-            scannerSection.classList.add("active");
-            if (flashBtn) flashBtn.disabled = true;
-            if (flashHint) flashHint.textContent = "";
-            manualFlashAlert.classList.remove("visible"); // Скрываем подсказку при старте
-
-            try {
-                qrScanner = new Html5Qrcode("qr-reader");
-
-                function getDynamicQrbox(viewfinderWidth, viewfinderHeight) {
-                    var minSide = Math.min(viewfinderWidth, viewfinderHeight);
-                    var side = Math.round(minSide * 0.70);
-                    if (side < 150) side = 150;
-                    return { width: side, height: side };
-                }
-
-                // Запуск сканера
-                qrScanner.start(
-                    { facingMode: "environment" }, // Задняя камера
-                    {
-                        fps: 10,
-                        qrbox: getDynamicQrbox,
-                        aspectRatio: 1.3333
-                    },
-                    function(decodedText) {
-                        // Успешное сканирование
-                        serialInput.value = decodedText.trim();
-                        stopCamera();
-                        runVerification();
-                    },
-                    function(errorMessage) {
-                        // Ошибки сканирования (нормально, если код не читается)
-                    }
-                )
-                .then(function() {
-                    // Камера успешно запустилась
-                    cameraActive = true;
-                    if (flashBtn) flashBtn.disabled = false;
-
-                    // Проверяем поддержку вспышки сразу после старта
-                    if (qrScanner.isFlashSupported && qrScanner.isFlashSupported()) {
-                        flashHint.textContent = "Вспышка доступна, нажмите кнопку.";
-                    } else {
-                        // ДЛЯ IPHONE И НЕКОТОРЫХ ANDROID:
-                        flashHint.textContent = "На этом устройстве вспышка не работает через браузер.";
-                        manualFlashAlert.classList.add("visible"); // Показываем подсказку про ручной фонарик
-                        if (flashBtn) flashBtn.disabled = true;
-                    }
-                })
-                .catch(function(err) {
-                    // РЕАЛЬНАЯ ОШИБКА ДОСТУПА
-                    cameraActive = false;
-                    scannerSection.classList.remove("active");
-                    
-                    var msg = "Не удалось получить доступ к камере.\n\n";
-                    if (err.name === "NotAllowedError") {
-                        msg += "Причина: Пользователь запретил доступ к камере.\nПроверьте настройки сайта в браузере (значок замка 🔒).";
-                    } else if (err.name === "NotFoundError") {
-                        msg += "Причина: На устройстве нет камеры или она занята другим приложением.";
-                    } else if (err.name === "SecurityError") {
-                        msg += "Причина: Сайт должен быть открыт по HTTPS. У вас GitHub Pages, там всё ок, попробуйте обновить страницу.";
-                    } else {
-                        msg += "Ошибка: " + err.message;
-                    }
-                    alert(msg);
-                });
-
-            } catch (e) {
-                alert("Ошибка инициализации сканера: " + e.message);
-                scannerSection.classList.remove("active");
-            }
-        });
-    }
-
-    if (qrStopBtn) {
-        qrStopBtn.addEventListener("click", stopCamera);
-    }
-
-    function stopCamera() {
-        if (qrScanner && cameraActive) {
-            qrScanner.stop()
-                .then(function() {
-                    cameraActive = false;
-                    scannerSection.classList.remove("active");
-                    qrReader.innerHTML = "";
-                    if (flashBtn) {
-                        flashBtn.disabled = true;
-                        flashBtn.textContent = "🔦 Включить вспышку";
-                        flashBtn.classList.remove("active");
-                        isFlashOn = false;
-                    }
-                    if (flashHint) flashHint.textContent = "";
-                    if (manualFlashAlert) manualFlashAlert.classList.remove("visible");
-                })
-                .catch(function() {
-                    cameraActive = false;
-                    scannerSection.classList.remove("active");
-                });
-        } else {
-            scannerSection.classList.remove("active");
-        }
-    }
+            URL.revokeObjectURL(url);
+        };
+        img.src = url;
+    });
 });
 </script>
-
 </body>
 </html>
