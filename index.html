@@ -153,7 +153,7 @@
             text-align: left;
         }
 
-        /* ====== ПРОСТОЙ ПРИЦЕЛ ====== */
+        /* ====== ПРИЦЕЛ ====== */
         #qr-reader {
             width: 100%;
             margin-top: 15px;
@@ -234,6 +234,13 @@
             cursor: not-allowed;
             opacity: 0.6;
         }
+
+        .flash-hint {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #a0aec0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -251,6 +258,7 @@
         <h3 style="margin-top: 0;">Сканирование QR-кода</h3>
         <div id="qr-reader"></div>
         <button id="flash-btn" disabled>🔦 Включить вспышку</button>
+        <p class="flash-hint" id="flash-hint"></p>
         <button id="qr-stop-btn" class="btn btn-stop">Остановить камеру</button>
     </div>
 
@@ -269,6 +277,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var scannerSection = document.getElementById("scanner-section");
     var qrReader = document.getElementById("qr-reader");
     var flashBtn = document.getElementById("flash-btn");
+    var flashHint = document.getElementById("flash-hint");
     var qrScanner = null;
     var cameraActive = false;
     var isFlashOn = false;
@@ -337,181 +346,3 @@ document.addEventListener("DOMContentLoaded", function() {
                         '<li><b>Аналоговая панель управления (Тонкая настройка):</b>',
                             '<br>• Регулятор частоты среза сабвуфера (Subwoofer Freq)',
                             '<br>• Регулятор индивидуальной громкости сабвуфера (Subwoofer Volume)',
-                            '<br>• Регулятор высоких частот (Treble)',
-                            '<br>• Регулятор низких частот (Bass)',
-                            '<br>• Общий силовой регулятор громкости и питания (Main Volume)',
-                        '</li>',
-                    '</ul>',
-                    '<h4>⚡ Электроника, питание и защита</h4>',
-                    '<ul class="specs-list">',
-                        '<li><b>Энергетическая база:</b> Мощная аккумуляторная сборка повышенной емкости 6S (номинальное рабочее напряжение 22.2 В — 24 В)</li>',
-                        '<li><b>Система умной защиты (BMS):</b> Плата 6S 40A 12mos (полный контроль от перезаряда, глубокого разряда и коротких замыканий)</li>',
-                        '<li><b>Индикация заряда:</b> Встроенный в корпус ЖК-экран с сочной зеленой подсветкой. Показывает точный процент оставшейся емкости аккумулятора (6S)</li>',
-                        '<li><b>Органы управления:</b> Премиальная металлическая антивандальная кнопка питания 22 мм с круговой светодиодной LED-подсветкой и фиксацией положения</li>',
-                        '<li><b>Порт зарядки:</b> Усиленное металлическое гнездо питания DC 5.5 x 2.1 мм, жестко зафиксированное в корпусе</li>',
-                        '<li><b>Зарядное устройство:</b> Фирменный сетевой адаптер Li-ion 25.2 В, 2А для быстрой и безопасной закачки энергии в батарею</li>',
-                    '</ul>',
-                    '<h3 class="parts-title">📦 Архитектура оригинальных компонентов</h3>',
-                    '<div class="part-card">',
-                        '<h4>1. Низкочастотный вуфер AIYIMA 5.25" (4 Ом)</h4>',
-                        '<img src="sub.png" alt="Сабвуфер AIYIMA">',
-                        '<a class="part-link" href="https://www.aliexpress.com/item/1005006276498847.html" target="_blank">Открыть карточку компонента</a>',
-                    '</div>',
-                    '<div class="part-card">',
-                        '<h4>2. Цифровой усилитель ZK-HT21 (TDA7498E)</h4>',
-                        '<img src="amp.png" alt="Усилитель ZK-HT21">',
-                        '<a class="part-link" href="https://www.aliexpress.com/item/1005006276498847.html" target="_blank">Открыть карточку компонента</a>',
-                    '</div>',
-                    '<div class="part-card">',
-                        '<h4>3. Платa BMS 6S 40A 12mos</h4>',
-                        '<img src="bms.png" alt="BMS 6S 40A">',
-                        '<a class="part-link" href="https://www.aliexpress.com/item/1005006276498847.html" target="_blank">Открыть карточку компонента</a>',
-                    '</div>',
-                    '<div class="part-card">',
-                        '<h4>4. Широкополосные динамики 4" (R/L каналы)</h4>',
-                        '<img src="speakers.png" alt="Широкополосные динамики">',
-                        '<a class="part-link" href="https://www.aliexpress.com/item/1005006276498847.html" target="_blank">Открыть карточку компонента</a>',
-                    '</div>',
-                '</div>'
-            ].join('');
-        } else {
-            resultContainer.innerHTML = [
-                '<div class="result-box error">',
-                    '<p style="font-size: 18px; margin: 0;">🔴 Серийный номер не найден в базе</p>',
-                    '<p style="font-size: 14px; margin: 10px 0 0 0; font-weight: normal;">',
-                        'Устройство с номером <b>' + serialNumber + '</b> не зарегистрировано в официальной базе Kontrbox. ',
-                        'Возможно, это подделка. Для уточнения информации свяжитесь с производителем.',
-                    '</p>',
-                '</div>'
-            ].join('');
-        }
-    }
-
-    // === Кнопка вспышки ===
-    if (flashBtn) {
-        flashBtn.addEventListener("click", function() {
-            if (!qrScanner || !cameraActive) {
-                alert("Сначала запустите камеру!");
-                return;
-            }
-            if (qrScanner.isFlashSupported()) {
-                qrScanner.toggleFlash(isFlashOn).then(function() {
-                    isFlashOn = !isFlashOn;
-                    if (isFlashOn) {
-                        flashBtn.textContent = "🔦 Выключить вспышку";
-                        flashBtn.classList.add("active");
-                    } else {
-                        flashBtn.textContent = "🔦 Включить вспышку";
-                        flashBtn.classList.remove("active");
-                    }
-                }).catch(function(err) {
-                    alert("Не удалось включить вспышку. Возможно, устройство не поддерживает.");
-                });
-            } else {
-                alert("Вспышка не поддерживается на этом устройстве (iOS). Включите фонарик вручную.");
-                flashBtn.disabled = true;
-            }
-        });
-    }
-
-    // === Сканирование QR-кода ===
-    if (qrBtn) {
-        qrBtn.addEventListener("click", function() {
-            if (cameraActive) return;
-
-            scannerSection.classList.add("active");
-            if (flashBtn) flashBtn.disabled = true;
-
-            // Проверяем, загрузилась ли библиотека
-            if (typeof Html5Qrcode === "undefined") {
-                alert("Библиотека сканера не загрузилась! Проверьте интернет.");
-                scannerSection.classList.remove("active");
-                return;
-            }
-
-            try {
-                qrScanner = new Html5Qrcode("qr-reader");
-
-                // ФИКС: qrbox теперь берёт размеры самого видео, а не окна
-                var qrboxConfig = {
-                    width: 250,
-                    height: 250
-                };
-
-                // Используем функцию для динамического размера,
-                // но с правильными параметрами от библиотеки
-                function getDynamicQrbox(viewfinderWidth, viewfinderHeight) {
-                    // Берём 70% от МЕНЬШЕЙ стороны ВИДЕО (не экрана!)
-                    var minSide = Math.min(viewfinderWidth, viewfinderHeight);
-                    var side = Math.round(minSide * 0.70);
-                    // Минимум 150px, чтобы код точно читался
-                    if (side < 150) side = 150;
-                    console.log("Scan box:", side + "x" + side, "Video:", viewfinderWidth + "x" + viewfinderHeight);
-                    return { width: side, height: side };
-                }
-
-                qrScanner.start(
-                    { facingMode: "environment" },
-                    {
-                        fps: 10,
-                        qrbox: getDynamicQrbox,
-                        aspectRatio: 1.3333
-                    },
-                    function(decodedText) {
-                        console.log("QR распознан:", decodedText);
-                        serialInput.value = decodedText.trim();
-                        stopCamera();
-                        runVerification();
-                    },
-                    function(errorMessage) {
-                        // Ошибки сканирования идут постоянно — это нормально
-                    }
-                ).then(function() {
-                    cameraActive = true;
-                    if (flashBtn) flashBtn.disabled = false;
-                    console.log("Камера запущена успешно");
-                }).catch(function(err) {
-                    console.error("Ошибка запуска:", err);
-                    alert("Не удалось получить доступ к камере.\n\nВозможные причины:\n1. Нет доступа к камере\n2. Сайт открыт не по HTTPS\n\nОшибка: " + err);
-                    scannerSection.classList.remove("active");
-                });
-            } catch (e) {
-                console.error("Ошибка инициализации:", e);
-                alert("Ошибка сканера: " + e.message);
-                scannerSection.classList.remove("active");
-            }
-        });
-    }
-
-    if (qrStopBtn) {
-        qrStopBtn.addEventListener("click", function() {
-            stopCamera();
-        });
-    }
-
-    function stopCamera() {
-        if (qrScanner && cameraActive) {
-            qrScanner.stop().then(function() {
-                cameraActive = false;
-                scannerSection.classList.remove("active");
-                qrReader.innerHTML = "";
-                if (flashBtn) {
-                    flashBtn.disabled = true;
-                    flashBtn.textContent = "🔦 Включить вспышку";
-                    flashBtn.classList.remove("active");
-                    isFlashOn = false;
-                }
-            }).catch(function() {
-                cameraActive = false;
-                scannerSection.classList.remove("active");
-                qrReader.innerHTML = "";
-            });
-        } else {
-            scannerSection.classList.remove("active");
-        }
-    }
-});
-</script>
-
-</body>
-</html>
