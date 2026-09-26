@@ -21,18 +21,18 @@
             color: #fff; text-transform: uppercase; letter-spacing: 2px;
         }
         input[type="text"] {
-            padding: 18px; background: #2d3748; border: 2px solid #4a5568;
-            border-radius: 12px; font-size: 16px; color: #fff; outline: none;
-            text-align: center; font-weight: bold; width: 100%; letter-spacing: 1px;
-            margin-bottom: 15px;
+            padding: 18px; background: #2d3748; border: none;
+            border-radius: 12px; font-size: 16px; color: #cbd5e0;
+            outline: none; text-align: center; font-weight: bold;
+            width: 100%; letter-spacing: 1px; margin-bottom: 15px;
         }
-        input[type="text"]:focus { border-color: #38a169; }
+        input[type="text"]:focus { background: #1a202c; color: #fff; }
 
         .btn {
             display: block; border: none; padding: 18px;
-            font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer;
-            transition: 0.2s; text-transform: uppercase; width: 100%;
-            text-align: center;
+            font-size: 16px; font-weight: bold; border-radius: 12px;
+            cursor: pointer; transition: 0.2s; text-transform: uppercase;
+            width: 100%; text-align: center;
         }
         .btn-verify { background: #38a169; color: white; }
         .btn-verify:hover { background: #2f855a; }
@@ -57,9 +57,19 @@
         .success { display: block; border-color: #38a169; background: #1c4532; color: #fff; }
         .error { display: block; border-color: #e53e3e; background: #652b2b; color: #fed7d7; }
 
+        .scan-guide {
+            position: relative;
+            width: 85%; max-width: 340px; aspect-ratio: 1;
+            border: 4px solid #38a169;
+            box-shadow: 0 0 15px rgba(56, 161, 105, 0.6),
+                        0 0 30px rgba(56, 161, 105, 0.3);
+            border-radius: 8px;
+            margin: 25px auto 15px;
+            background: rgba(0, 0, 0, 0.3);
+        }
         .scan-hint {
-            text-align: center; color: #a0aec0; font-size: 13px;
-            line-height: 1.4; margin-top: 8px;
+            text-align: center; color: #a0aec0; font-size: 14px;
+            line-height: 1.4; margin-top: 10px; padding: 0 10px;
         }
     </style>
 </head>
@@ -68,15 +78,14 @@
 <div class="container">
     <h1>🛡️ KONTRBOX VERIFY</h1>
 
-    <!-- Рамка убрана -->
-
+    <div class="scan-guide"></div>
     <p class="scan-hint">
-        Сфотографируйте QR‑код так, чтобы он был хорошо виден.<br>
+        Наведите рамку на QR‑код при фотографировании.<br>
         На iPhone вспышка включается в родной камере.
     </p>
 
-    <input type="text" id="serial-input" placeholder="СЕРИЙНЫЙ НОМЕР">
-    <button id="verify-btn" class="btn btn-verify">Проверить подлинность</button>
+    <input type="text" id="serial-input" placeholder="СЕРИЙНЫЙ">
+    <button id="verify-btn" class="btn btn-verify">ПРОВЕРИТЬ ПОДЛИННОСТЬ</button>
 
     <label for="camera-input" class="btn btn-qr">📷 Сфоткать QR‑код</label>
     <input type="file" id="camera-input" accept="image/*" capture="environment">
@@ -88,9 +97,73 @@
     <div id="result-container"></div>
 </div>
 
-<!-- Библиотека для чтения QR с фото -->
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const
+    const verifyBtn = document.getElementById("verify-btn");
+    const serialInput = document.getElementById("serial-input");
+    const resultContainer = document.getElementById("result-container");
+    const cameraInput = document.getElementById("camera-input");
+    const photoPreview = document.getElementById("photo-preview");
+    const photoImg = document.getElementById("photo-img");
+
+    function showResult(isSuccess, message) {
+        resultContainer.innerHTML = `
+            <div class="result-box \${isSuccess ? 'success' : 'error'}">
+                <p>${isSuccess ? '🟢' : '🔴'} ${message}</p>
+                <p style="font-size:14px; color:\${isSuccess ? '#cbd5e0' : '#fed7d7'}; margin-top:8px;">
+                    \${isSuccess
+                        ? 'Устройство зарегистрировано в базе.'
+                        : 'Проверьте правильность ввода или отсканируйте QR заново.'}
+                </p>
+            </div>`;
+    }
+
+    function checkSerial(serial) {
+        if (!serial) return;
+        const s = serial.trim();
+        if (s === "8602095001") {
+            showResult(true, "Оригинальный продукт Kontrbox");
+        } else {
+            showResult(false, "Серийный номер не найден");
+        }
+    }
+
+    if (verifyBtn) verifyBtn.addEventListener("click", () => checkSerial(serialInput.value));
+    if (serialInput) serialInput.addEventListener("keypress", e => {
+        if (e.key === "Enter") checkSerial(serialInput.value);
+    });
+
+    cameraInput.addEventListener("change", function(e) {
+        const file = e.target.files;
+        if (!file) return;
+
+        photoPreview.style.display = "block";
+        const url = URL.createObjectURL(file);
+        photoImg.src = url;
+
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+            if (code && code.data) {
+                serialInput.value = code.data.trim();
+                checkSerial(code.data.trim());
+            } else {
+                showResult(false, "QR не распознан");
+            }
+            URL.revokeObjectURL(url);
+        };
+        img.src = url;
+    });
+});
+</script>
+</body>
+</html>
