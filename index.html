@@ -24,12 +24,15 @@
             padding: 18px; background: #2d3748; border: 2px solid #4a5568;
             border-radius: 12px; font-size: 16px; color: #fff; outline: none;
             text-align: center; font-weight: bold; width: 100%; letter-spacing: 1px;
+            margin-bottom: 15px;
         }
         input[type="text"]:focus { border-color: #38a169; }
+
         .btn {
-            text-align: center; display: block; border: none; padding: 18px;
+            display: block; border: none; padding: 18px;
             font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer;
             transition: 0.2s; text-transform: uppercase; width: 100%;
+            text-align: center;
         }
         .btn-verify { background: #38a169; color: white; }
         .btn-verify:hover { background: #2f855a; }
@@ -54,14 +57,6 @@
         .success { display: block; border-color: #38a169; background: #1c4532; color: #fff; }
         .error { display: block; border-color: #e53e3e; background: #652b2b; color: #fed7d7; }
 
-        /* Рамка для наведения на QR при фото */
-        .scan-guide {
-            position: relative;
-            width: 80%; max-width: 320px; aspect-ratio: 1;
-            border: 4px solid #38a169; border-radius: 8px;
-            margin: 30px auto 15px;
-            box-shadow: 0 0 20px rgba(56, 161, 105, 0.4);
-        }
         .scan-hint {
             text-align: center; color: #a0aec0; font-size: 13px;
             line-height: 1.4; margin-top: 8px;
@@ -73,17 +68,17 @@
 <div class="container">
     <h1>🛡️ KONTRBOX VERIFY</h1>
 
-    <!-- Подсказка, куда класть QR -->
-    <div class="scan-guide"></div>
+    <!-- Рамка убрана -->
+
     <p class="scan-hint">
-        Наведите рамку на QR-код при фотографировании.<br>
+        Сфотографируйте QR‑код так, чтобы он был хорошо виден.<br>
         На iPhone вспышка включается в родной камере.
     </p>
 
     <input type="text" id="serial-input" placeholder="СЕРИЙНЫЙ НОМЕР">
     <button id="verify-btn" class="btn btn-verify">Проверить подлинность</button>
 
-    <label for="camera-input" class="btn btn-qr">📷 Сфоткать QR-код</label>
+    <label for="camera-input" class="btn btn-qr">📷 Сфоткать QR‑код</label>
     <input type="file" id="camera-input" accept="image/*" capture="environment">
 
     <div id="photo-preview" class="preview-area">
@@ -98,73 +93,4 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const verifyBtn = document.getElementById("verify-btn");
-    const serialInput = document.getElementById("serial-input");
-    const resultContainer = document.getElementById("result-container");
-    const cameraInput = document.getElementById("camera-input");
-    const photoPreview = document.getElementById("photo-preview");
-    const photoImg = document.getElementById("photo-img");
-
-    function checkSerial(serial) {
-        if (!serial) return;
-        const s = serial.trim();
-        if (s === "8602095001") {
-            resultContainer.innerHTML = `
-                <div class="result-box success">
-                    <p>🟢 Оригинальный продукт Kontrbox</p>
-                    <p style="font-size:14px; color:#cbd5e0; margin-top:8px;">
-                        Устройство зарегистрировано в базе.
-                    </p>
-                </div>`;
-        } else {
-            resultContainer.innerHTML = `
-                <div class="result-box error">
-                    <p>🔴 Серийный номер не найден</p>
-                    <p style="font-size:14px; color:#fed7d7; margin-top:8px;">
-                        Проверьте правильность ввода или отсканируйте QR заново.
-                    </p>
-                </div>`;
-        }
-    }
-
-    if (verifyBtn) verifyBtn.addEventListener("click", () => checkSerial(serialInput.value));
-    if (serialInput) serialInput.addEventListener("keypress", e => { if (e.key === "Enter") checkSerial(serialInput.value); });
-
-    cameraInput.addEventListener("change", function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        photoPreview.style.display = "block";
-        const url = URL.createObjectURL(file);
-        photoImg.src = url;
-
-        const img = new Image();
-        img.onload = function() {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
-            if (code && code.data) {
-                serialInput.value = code.data.trim();
-                checkSerial(code.data.trim());
-            } else {
-                resultContainer.innerHTML = `
-                    <div class="result-box error">
-                        <p>❌ QR не распознан</p>
-                        <p style="font-size:13px; color:#fed7d7;">
-                            Сфотографируйте чётче, держите QR ровно в рамке, без бликов.
-                        </p>
-                    </div>`;
-            }
-            URL.revokeObjectURL(url);
-        };
-        img.src = url;
-    });
-});
-</script>
-</body>
-</html>
+    const
