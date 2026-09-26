@@ -17,8 +17,23 @@
             border: 1px solid #2d3748;
         }
         h1 {
-            text-align: center; font-size: 24px; margin-bottom: 25px;
-            color: #fff; text-transform: uppercase; letter-spacing: 2px;
+            text-align: center; font-size: 28px; margin-bottom: 20px;
+            color: #fff; text-transform: uppercase; letter-spacing: 3px;
+            line-height: 1.1;
+        }
+        /* Рамка как на скриншоте: чёрный центр + неоновый контур */
+        .scan-guide {
+            width: 85%; max-width: 340px; aspect-ratio: 1;
+            border: 4px solid #38a169;
+            box-shadow: 0 0 15px rgba(56, 161, 105, 0.6),
+                        0 0 30px rgba(56, 161, 105, 0.4);
+            border-radius: 8px;
+            margin: 20px auto 15px;
+            background: #000000;
+        }
+        .scan-hint {
+            text-align: center; color: #a0aec0; font-size: 14px;
+            line-height: 1.5; margin-top: 10px; padding: 0 10px;
         }
         input[type="text"] {
             padding: 18px; background: #2d3748; border: none;
@@ -56,27 +71,12 @@
         }
         .success { display: block; border-color: #38a169; background: #1c4532; color: #fff; }
         .error { display: block; border-color: #e53e3e; background: #652b2b; color: #fed7d7; }
-
-        .scan-guide {
-            position: relative;
-            width: 85%; max-width: 340px; aspect-ratio: 1;
-            border: 4px solid #38a169;
-            box-shadow: 0 0 15px rgba(56, 161, 105, 0.6),
-                        0 0 30px rgba(56, 161, 105, 0.3);
-            border-radius: 8px;
-            margin: 25px auto 15px;
-            background: rgba(0, 0, 0, 0.3);
-        }
-        .scan-hint {
-            text-align: center; color: #a0aec0; font-size: 14px;
-            line-height: 1.4; margin-top: 10px; padding: 0 10px;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🛡️ KONTRBOX VERIFY</h1>
+    <h1>KONTRBOX<br>VERIFY</h1>
 
     <div class="scan-guide"></div>
     <p class="scan-hint">
